@@ -1,0 +1,1 @@
+exports.refreshTokenSize = 64;
