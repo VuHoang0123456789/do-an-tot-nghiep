@@ -1,8 +1,9 @@
 const db = require('../../config/db');
+
 class AccountModel {
     GetAccountByEmail(Email) {
         return new Promise((resolve, reject) => {
-            const querySql = `select * from Account where Account.Email = '${Email}'`;
+            const querySql = `select * from Account where Email = '${Email}'`;
             db.query(querySql, (err, result) => {
                 if (err) {
                     return reject(err);
@@ -55,9 +56,9 @@ class AccountModel {
     }
     InsertUser(user) {
         return new Promise((resolve, reject) => {
-            const queryStr = `call InsretAccount(${parseInt(user.typeAccount)},'${user.id}', '${user.email}', '${
-                user.passWord
-            }', '${user.showName}', "", ${user.verified})`;
+            const queryStr = `
+            call InsretAccount(${parseInt(user.typeAccount)},'${user.Id}', 
+            '${user.email}', '${user.passWord}', '${user.showName}', '${user.url_avatar}', ${user.verified})`;
             db.query(queryStr, (err, result) => {
                 if (err) {
                     reject(err);
@@ -79,7 +80,13 @@ class AccountModel {
     }
     UpdateAccount(Account) {
         return new Promise((resolve, reject) => {
-            const queryStr = `update Account set passWord = '${Account.passWord}', showName = '${Account.showName}', avatar = '${Account.url_avatar}' where email = '${Account.email}'`;
+            const queryStr = `
+            update 
+                Account 
+            set 
+                passWord = '${Account.passWord}', showName = '${Account.showName}', 
+                avatar = '${Account.url_avatar}' where email = '${Account.email}'`;
+
             db.query(queryStr, (err, result) => {
                 if (err) {
                     reject(err);

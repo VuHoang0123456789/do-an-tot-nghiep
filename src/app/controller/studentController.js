@@ -6,6 +6,7 @@ const studentModel = require('../model/studentModel');
 const lecturersModel = require('../model/lecturersModel');
 const teamModel = require('../model/teamModel');
 const PairingModel = require('../model/PairingModel');
+const reportModel = require('../model/reportModel');
 
 class StudentController {
     // Đăng ký Platfrom cho sinh viên, sau khi upload file sẽ nhận về 2 mã nhóm và mã sinh viên
@@ -13,10 +14,16 @@ class StudentController {
     // post /student/register-platform/:slug
     async RegisterPlatfrom(req, res, next) {
         const date = new Date();
-        let Team = { teamName: req.body.teamName, count: req.body.count, teamId: req.body.teamId };
+
+        let Team = {
+            teamName: req.body.teamName,
+            count: parseInt(req.body.count),
+            teamId: req.body.teamId,
+            url: '',
+        };
         let RegisterTeam = {
             registerDate: [date.getFullYear(), date.getMonth() + 1, date.getDate()].join('-'),
-            stageId: req.body.stageId,
+            stageId: parseInt(req.body.stageId),
             teamId: req.body.teamId,
             studentId: req.body.studentId,
         };
@@ -28,6 +35,19 @@ class StudentController {
         let ResearchQuestion = req.body.questions;
 
         try {
+            // Gán lại lý lịch url
+            const teamfromFatabase = await teamModel.GetTeamByTeamId(req.body.teamId);
+            Team.url = teamfromFatabase.LyLichThanhVien;
+            // Kiểm tra tên nhóm
+            if (await teamModel.GetTeamByTeamName(Team.teamName)) {
+                return res.status(400).send('Tên nhóm đã tồn tại, vui lòng chọn tên khác.');
+            }
+            // Kiểm tra xem sinh viên đã đăng ký vào platfrom chưa nếu có rồi thì không cho đăng ký nữa
+            const isTeam = await teamModel.GetTeamByTeamNameAndStudentId(Team.teamName, RegisterTeam.studentId);
+            if (isTeam) {
+                return res.status(400).send('Sinh viên đã có nhóm, không thể đăng ký thêm.');
+            }
+
             await TeamModel.UpdateTeam(Team);
             await RegisterTeamModel.AddNewRegisterTeam(RegisterTeam);
             await ResearchFieldModel.UpdateResearchField(ResearchField);
@@ -132,8 +152,7 @@ class StudentController {
     // Get /get-team
     async GetTeam(req, res, next) {
         try {
-            const teamInfomation = await teamModel.GetTeamByTeamId(req.body.teamId);
-
+            const teamInfomation = await teamModel.GetTeamByTeamId(req.headers.teamid);
             const rearchQuestion = await ResearchQuestionModel.GetResearchQuestionByResearchFieldId(
                 teamInfomation.MaLinhVucNghienCuu,
             );
@@ -200,7 +219,7 @@ class StudentController {
             res.status(200).send('Cập nhật thành công.');
         } catch (error) {
             console.log(error);
-            res.status(400).send('Cập nhật không thành công, vui lòng kiểm tra lại thông tin.');
+            res.status(400).json(error);
         }
     }
     // put /:slug/upload-file-report
@@ -208,26 +227,36 @@ class StudentController {
         if (!req.file) {
             return res.status(400).send('Upload file không thành công, vui lòng thử lại.');
         }
-        const createAt = req.report.NgayBatDau;
-        const deadline = req.report.HanNopBaoCao;
-        const dateOfFliling = req.report.NgayNopBaoCao;
 
-        const report = {
-            reportId: req.report.reportId,
-            title: req.report.TieuDe,
-            deadline: [deadline.getFullYear(), deadline.getMonth() + 1, deadline.getDate()].join('-'),
-            createAt: [createAt.getFullYear(), createAt.getMonth() + 1, createAt.getDate()].join('-'),
-            dateOfFliling: [dateOfFliling.getFullYear(), dateOfFliling.getMonth() + 1, dateOfFliling.getDate()].join(
-                '-',
-            ),
-            note: req.report.Note,
-            lecturersId: req.report.MaGiangVienDk,
-            teamId: req.report.MaNhom,
-            stageId: req.report.Id,
-            isFiling: true,
-        };
+        try {
+            const createAt = req.report.NgayBatDau;
+            const deadline = req.report.HanNopBaoCao;
+            const dateOfFliling = new Date();
 
-        return res.status(200).json(report);
+            const report = {
+                reportId: req.report.ReportId,
+                title: req.report.TieuDe,
+                deadline: [deadline.getFullYear(), deadline.getMonth() + 1, deadline.getDate()].join('-'),
+                createAt: [createAt.getFullYear(), createAt.getMonth() + 1, createAt.getDate()].join('-'),
+                dateOfFliling: [
+                    dateOfFliling.getFullYear(),
+                    dateOfFliling.getMonth() + 1,
+                    dateOfFliling.getDate(),
+                ].join('-'),
+                url: req.file.path,
+                note: req.report.Note,
+                lecturersId: req.report.MaGiangVienDk,
+                teamId: req.report.MaNhom,
+                stageId: req.report.Id,
+                isFiling: true,
+            };
+
+            await reportModel.UpdateReport(report);
+            return res.status(200).send('Update thành công!');
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json(error);
+        }
     }
     // PUT /:slug/update-ResearchQuestion
     async UpdateResearchQuestion(req, res, next) {
@@ -236,7 +265,7 @@ class StudentController {
             const ResearchQuestionFromDatabase = await ResearchQuestionModel.GetResearchQuestionByquestionId(
                 questionId,
             );
-            console.log(ResearchQuestionFromDatabase);
+
             const ResearchQuestion = {
                 content: !req.body.content ? ResearchQuestionFromDatabase.NoiDungCauHoi : req.body.content,
                 researchFieldId: !req.body.researchFieldId

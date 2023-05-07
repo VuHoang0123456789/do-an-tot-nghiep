@@ -24,7 +24,11 @@ class ResearchQuestionModel {
     }
     GetResearchQuestion(ResearchQuestion, researchFieldId) {
         return new Promise((reslove, reject) => {
-            const queryStr = `select * from ResearchQuestion where NoiDungCauHoi = '${ResearchQuestion}' and MaLinhVucNghienCuu = '${researchFieldId}'`;
+            const queryStr = `
+            select * 
+            from ResearchQuestion 
+            where NoiDungCauHoi = '${ResearchQuestion}' and MaLinhVucNghienCuu = '${researchFieldId}'`;
+
             db.query(queryStr, (err, result) => {
                 if (err) {
                     return reject(err);
@@ -35,7 +39,11 @@ class ResearchQuestionModel {
     }
     AddNewResearchQuestion(ResearchQuestion, researchFieldId) {
         return new Promise((reslove, reject) => {
-            const queryStr = `insert into ResearchQuestion(NoiDungCauHoi, MaLinhVucNghienCuu) values('${ResearchQuestion}', '${researchFieldId}')`;
+            const queryStr = `
+            insert into ResearchQuestion
+                (NoiDungCauHoi, MaLinhVucNghienCuu) 
+            values
+                ('${ResearchQuestion}', '${researchFieldId}')`;
 
             db.query(queryStr, (err, result) => {
                 if (err) {
@@ -48,9 +56,12 @@ class ResearchQuestionModel {
     UpdateResearchQuetion(ResearchQuestion, questionId) {
         return new Promise((reslove, reject) => {
             const queryStr = `
-            update ResearchQuestion 
-            set NoiDungCauHoi = '${ResearchQuestion.content}', MaLinhVucNghienCuu = '${ResearchQuestion.researchFieldId}' 
-            where MaCauHoi = ${questionId}`;
+            update 
+                ResearchQuestion 
+            set 
+                NoiDungCauHoi = '${ResearchQuestion.content}' 
+            where 
+                MaCauHoi = ${questionId} and MaLinhVucNghienCuu = '${ResearchQuestion.researchFieldId}'`;
 
             db.query(queryStr, (err, result) => {
                 if (err) {

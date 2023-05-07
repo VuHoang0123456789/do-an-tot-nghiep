@@ -22,6 +22,6 @@ router.put(
     fileUploader.array('uploadfile', 2),
     LecturersController.UpdateFile,
 );
-router.delete('/:slug/delete-paring', LecturersController.DeletePairing);
+router.delete('/:slug/delete-paring', isAuth, LecturersController.DeletePairing);
 router.put('/:slug/update-lecturers', isAuth, LecturersController.UpdateLecturers);
 module.exports = router;

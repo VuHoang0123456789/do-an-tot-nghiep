@@ -3,8 +3,12 @@ class PairingModel {
     AddNewPairing(Pairing) {
         return new Promise((reslove, reject) => {
             const queryStr = `
-            insert into Pairing (YKienGiangVien, MaGiangVienDk, ThoiDiemDangKy, ThoiDiemXacNhan, MaNhom, Id) 
-            values (${Pairing.personalOpinion}, '${Pairing.lecturersId}', '${Pairing.dateRegister}', '${Pairing.dateOk}', '${Pairing.teamId}', ${Pairing.stageId});`;
+            insert into Pairing 
+                (YKienGiangVien, MaGiangVienDk, ThoiDiemDangKy, ThoiDiemXacNhan, MaNhom, Id) 
+            values 
+                (${Pairing.personalOpinion}, '${Pairing.lecturersId}', '${Pairing.dateRegister}', 
+                '${Pairing.dateOk}', '${Pairing.teamId}', ${Pairing.stageId});`;
+
             db.query(queryStr, (err, result) => {
                 if (err) {
                     return reject(err);
@@ -16,9 +20,13 @@ class PairingModel {
     UpdatePairing(Pairing) {
         return new Promise((reslove, reject) => {
             const queryStr = `
-            update Pairing 
-            set YKienGiangVien = ${Pairing.personalOpinion}, ThoiDiemXacNhan = '${Pairing.dateOk}' 
-            where MaGiangVienDk = '${Pairing.lecturersId}' and MaNhom = '${Pairing.teamId}' and Id = ${Pairing.stageId}`;
+            update 
+                Pairing 
+            set 
+                YKienGiangVien = ${Pairing.personalOpinion}, ThoiDiemXacNhan = '${Pairing.dateOk}' 
+            where 
+                MaGiangVienDk = '${Pairing.lecturersId}' and MaNhom = '${Pairing.teamId}' and Id = ${Pairing.stageId}`;
+
             db.query(queryStr, (err, result) => {
                 if (err) {
                     return reject(err);
@@ -29,7 +37,9 @@ class PairingModel {
     }
     DeletePairing(Pairing) {
         return new Promise((reslove, reject) => {
-            const queryStr = `delete from Pairing where MaGiangVienDk = '${Pairing.lecturersId}'and Id = ${Pairing.stageId} and MaNhom = '${Pairing.teamId}';`;
+            const queryStr = `
+            delete from Pairing 
+            where MaGiangVienDk = '${Pairing.lecturersId}'and Id = ${Pairing.stageId} and MaNhom = '${Pairing.teamId}';`;
             db.query(queryStr, (err, result) => {
                 if (err) {
                     return reject(err);

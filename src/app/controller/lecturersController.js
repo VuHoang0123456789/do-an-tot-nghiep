@@ -7,11 +7,12 @@ const teamModel = require('../model/teamModel');
 class LecturersController {
     // POST /:slug/register-platform
     async RegisterPlatfrom(req, res, next) {
-        const LecturersRegistered = await LecturerstModel.GetLecturersRegistedByLecturersRegistedId(
-            req.body.lecturersRegistedId,
+        const IsLecturersRegistered = await LecturerstModel.GetLecturersByLecturersRegistedIdAndLecturersId(
+            req.body.lecturersId,
+            parseInt(req.body.stageId),
         );
-        if (!LecturersRegistered) {
-            return res.status(401).send('Đăng ký không thành công, vui lòng thử lại.');
+        if (IsLecturersRegistered) {
+            return res.status(400).send('Bạn đã đăng ký vào platform rồi.');
         }
 
         try {
@@ -22,7 +23,7 @@ class LecturersController {
                 specialized: req.body.specialized,
             };
             let RegisterLecturers = {
-                stageId: req.body.stageId,
+                stageId: parseInt(req.body.stageId),
                 lecturersId: req.body.lecturersId,
                 lecturersRegistedId: req.body.lecturersRegistedId,
                 registerDate: [date.getFullYear(), date.getMonth() + 1, date.getDate()].join('-'),
@@ -42,6 +43,14 @@ class LecturersController {
             next(new Error('No file uploaded!'));
             return;
         }
+        const IsLecturersRegistered = await LecturerstModel.GetLecturersByLecturersRegistedIdAndLecturersId(
+            req.headers.lecturersid,
+            parseInt(req.headers.stageid),
+        );
+        if (IsLecturersRegistered) {
+            return res.status(400).send('Bạn đã đăng ký vào platform rồi.');
+        }
+
         let LecturersRegisted = {
             LecturersId: '',
             image_url: req.files[0].path,
@@ -50,7 +59,7 @@ class LecturersController {
             specialized: '',
         };
 
-        LecturersRegisted.LecturersId = `GVDK'${Math.floor(100000 + Math.random() * 900000)}'`;
+        LecturersRegisted.LecturersId = `GVDK${Math.floor(100000 + Math.random() * 900000)}`;
         try {
             await LecturerstModel.AddFileOfLecturersRegisted(LecturersRegisted);
         } catch (error) {
@@ -85,11 +94,12 @@ class LecturersController {
     async GetInfomationLectures(req, res, next) {
         try {
             const lecturersAccount = await accountModel.GetEmailByLecturersId(undefined, req.user.Email);
+            console.log(lecturersAccount);
             const lecturersId = lecturersAccount.MaGiangVien;
             const lecturersInfomation = await LecturerstModel.GetLecturersByLecturersId(lecturersId);
             const teamInfomation = await teamModel.GetTeamByLecturersId(
                 lecturersInfomation.MaGiangVienDk,
-                req.body.stageId,
+                parseInt(req.body.stageId),
             );
             const result = {
                 lecturersInfomation: lecturersInfomation,
@@ -172,7 +182,7 @@ class LecturersController {
                 lecturersId: report.MaGiangVienDk,
                 teamId: report.MaNhom,
                 stageId: report.Id,
-                isFiling: true,
+                isFiling: report.isFiling,
             };
             ReportOfRes.push(reportOfRes);
         });
@@ -235,6 +245,7 @@ class LecturersController {
             LecturersRegisted.specialized = !req.body.specialized
                 ? LecturersRegistedFromDatabase.TenChuyenNganhHuongDan
                 : req.body.specialized;
+
             // Cập nhật lecturersRegisted
             await LecturerstModel.UpdateLecturersRegisterd(LecturersRegisted);
             return res.status(200).send('Cập nhật thành công.');

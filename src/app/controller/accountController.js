@@ -5,11 +5,12 @@ const bcrypt = require('bcrypt');
 const studentModel = require('../model/studentModel');
 const lecturersModel = require('../model/lecturersModel');
 const adminModel = require('../model/adminModel');
+const accountModel = require('../model/accountModel');
 
 class AccountController {
     async GetAccount(req, res, next) {
         let user;
-        user = await AccountModel.GetEmailByStudentId(undefined, req.user.Email);
+        user = await AccountModel.GetNewUser.emailByStudentId(undefined, req.user.Email);
         if (user) {
             return res.status(200).json({
                 email: req.user.Email,
@@ -91,42 +92,41 @@ class AccountController {
         const NewUser = req.body;
         // Kiểm tra người dùng có tồn tại trong hệ thống không
         if (NewUser.typeAccount === '2') {
-            const Student = await studentModel.GetStudentByStudentId(NewUser.id);
+            const Student = await studentModel.GetStudentByStudentId(NewUser.Id);
             if (!Student) {
                 return res.status(400).send('Mã sinh viên không đúng, vui lòng kiểm tra lại mã sinh viên');
             }
         }
         if (NewUser.typeAccount === '1') {
-            const Lecturers = await lecturersModel.GetStudentLecturersId(NewUser.id);
+            const Lecturers = await lecturersModel.GetStudentLecturersId(NewUser.Id);
             if (!Lecturers) {
                 return res.status(400).send('Mã giảng viên không đúng, vui lòng kiểm tra lại mã giảng viên');
             }
         }
         if (NewUser.typeAccount === '0') {
-            const Admin = await adminModel.GetStudentAdminId(NewUser.id);
+            const Admin = await adminModel.GetStudentAdminId(NewUser.Id);
             if (!Admin) {
                 return res.status(400).send('Mã người quản lý không đúng, vui lòng kiểm tra lại mã người quản lý');
             }
         }
-        if ((NewUser.typeAccount !== '0', NewUser.typeAccount !== '1', NewUser.typeAccount !== '2')) {
+
+        if (NewUser.typeAccount !== '0' && NewUser.typeAccount !== '1' && NewUser.typeAccount !== '2') {
             return res.status(400).send('Kiểu tài khoản không đúng, vui lòng kiểm tra lại.');
         }
 
-        // kiểm tra otp
-        const otpIsVaild = await authMethod.verifyOtp(NewUser);
-        if (!otpIsVaild) {
-            return res.status(400).send('Mã OTP không đúng, vui lòng kiểm tra lại thông tin');
-        }
-        await OTPModule.DeleteOTP(NewUser.otp);
-        //hash passWord
-        const hashPassword = bcrypt.hashSync(NewUser.passWord, 8);
-        NewUser.passWord = hashPassword;
-
         try {
-            if (NewUser.verified) {
-                return res.status(400).send('Địa chỉ email đã sử dụng rồi, vui lòng đổi qua email khác.');
+            const user = await accountModel.GetAccountByEmail(NewUser.email);
+            if (user.verified) {
+                return res.status(400).send('Đã tồn tại tài khoản, vui lòng kiểm tra lại.');
             }
-            await AccountModel.UpdateVerifiedAccount(NewUser.email); // update việc xác minh tài khoản bằng otp
+            // kiểm tra otp
+            const otpIsVaild = await authMethod.verifyOtp(NewUser);
+            if (!otpIsVaild) {
+                return res.status(400).send('Mã OTP không đúng, vui lòng kiểm tra lại thông tin');
+            }
+            await OTPModule.DeleteOTP(NewUser.otp);
+            // update việc xác minh tài khoản bằng otp
+            await AccountModel.UpdateVerifiedAccount(NewUser.email);
             return res.json({
                 msg: 'Tạo tài khoản thành công',
             });

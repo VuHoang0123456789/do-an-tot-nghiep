@@ -11,9 +11,7 @@ app.use(morgan('combined')); //http logger
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json()); //format body client
-app.get('/', (req, res, next) => {
-    res.send('hello world!');
-});
+
 route(app);
 
 app.listen(port, () => {

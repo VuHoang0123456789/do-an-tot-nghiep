@@ -13,12 +13,21 @@ class StudentModel {
     }
     GetAllInfomationByEmail(email) {
         return new Promise((resolve, reject) => {
-            const queryStr = `select * 
-            from (select * 
-                from Student
-                 where MaSinhVien in (select MaSinhVien 
-                    from StudentAccount where email = '${email}')) as Student join RegisterTeam on Student.MaSinhVien = RegisterTeam.MaSinhVien 
-                    join Team on Team.MaNhom = RegisterTeam.MaNhom;`;
+            const queryStr = `
+            select * 
+            from 
+                (
+                    select * 
+                    from Student
+                    where MaSinhVien in 
+                    (
+                        select MaSinhVien 
+                        from StudentAccount 
+                        where email = '${email}'
+                    )
+                ) as Student 
+                join RegisterTeam on Student.MaSinhVien = RegisterTeam.MaSinhVien 
+                join Team on Team.MaNhom = RegisterTeam.MaNhom;`;
 
             db.query(queryStr, (err, result) => {
                 if (err) {

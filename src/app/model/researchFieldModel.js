@@ -13,7 +13,12 @@ class ResearchFieldModel {
     }
     AddNewResearchField(ResearchField) {
         return new Promise((reslove, reject) => {
-            const queryStr = `insert into ResearchField (MaLinhVucNghienCuu, TenLinhVucNghienCuu, TenDeTaiNghienCuu, createAt) values ('${ResearchField.id}', '${ResearchField.name}', '${ResearchField.topicName}', now());`;
+            const queryStr = `
+            insert into ResearchField 
+                (MaLinhVucNghienCuu, TenLinhVucNghienCuu, TenDeTaiNghienCuu, createAt) 
+            values 
+                ('${ResearchField.id}', '${ResearchField.name}', '${ResearchField.topicName}', now());`;
+
             db.query(queryStr, (err, result) => {
                 if (err) {
                     return reject(err);
@@ -24,7 +29,15 @@ class ResearchFieldModel {
     }
     UpdateResearchField(ResearchField) {
         return new Promise((reslove, reject) => {
-            const queryStr = `update ResearchField set TenLinhVucNghienCuu ='${ResearchField.ResearchFieldName}', TenDetaiNghienCuu = '${ResearchField.topicName}' where MaLinhVucNghienCuu = ${ResearchField.ResearchFieldId}`;
+            const queryStr = `
+            update 
+                ResearchField 
+            set 
+                TenLinhVucNghienCuu ='${ResearchField.researchFieldName}', 
+                TenDetaiNghienCuu = '${ResearchField.topicName}' 
+            where 
+                MaLinhVucNghienCuu = ${ResearchField.researchFieldId}`;
+
             db.query(queryStr, (err, result) => {
                 if (err) {
                     return reject(err);
