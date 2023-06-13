@@ -326,7 +326,7 @@ class AuthController {
 
             setTimeout(() => {
                 OTPModule.DeleteOTP(OTP.otp);
-            }, 30000);
+            }, 300000);
 
             // setup gửi otp qua gmail
             const subject = 'Mã OTP đăng ký tài khoản';
