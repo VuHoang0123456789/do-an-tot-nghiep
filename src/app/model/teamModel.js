@@ -30,18 +30,27 @@ class TeamModel {
             });
         });
     }
-    GetTeamByLecturersId(lecturersId, stageId) {
+    GetTeamByLecturersId(lecturersId) {
         return new Promise((reslove, reject) => {
             const queryStr = `
             select 
-                Team.MaNhom, TenNhom, SoLuongThanhVien, LyLichThanhVien, TenLinhVucNghienCuu, HoTen
+                Team.MaNhom, ResearchField.MaLinhVucNghienCuu, TenNhom, SoLuongThanhVien,
+                LyLichThanhVien, TenLinhVucNghienCuu, TenDeTaiNghienCuu, HoTen, YKienGiangVien
             from 
                 Pairing join Team on Team.MaNhom = Pairing.MaNhom
                 join ResearchField on ResearchField.MaLinhVucNghienCuu = Team.MaLinhVucNghienCuu
                 join RegisterTeam on RegisterTeam.MaNhom = Team.MaNhom
                 join Student on Student.MaSinhVien = RegisterTeam.MaSinhVien
             where 
-                MaGiangVienDk = '${lecturersId}' and Pairing.Id = '${stageId}'`;
+                MaGiangVienDk = '${lecturersId}' AND Pairing.Id IN (
+                    SELECT Id 
+                    FROM Stage 
+                    WHERE DKID = (
+                        SELECT DKID 
+                        FROM AcademicModulesRegisted 
+                        WHERE NgayBatDau <= CURRENT_DATE() AND NgayKetThuc >= CURRENT_DATE() 
+                    ) 
+                )`;
 
             db.query(queryStr, (err, result) => {
                 if (err) {
@@ -51,14 +60,52 @@ class TeamModel {
             });
         });
     }
-    GetTeamByTeamNameAndStudentId(teamName, studentId) {
+    GetTeamByLecturersIdAndOpinion(lecturersId, stageId) {
+        return new Promise((reslove, reject) => {
+            const queryStr = `
+            select 
+                Team.MaNhom, ResearchField.MaLinhVucNghienCuu, TenNhom, SoLuongThanhVien,
+                LyLichThanhVien, TenLinhVucNghienCuu, TenDeTaiNghienCuu, HoTen, YKienGiangVien
+            from 
+                Pairing join Team on Team.MaNhom = Pairing.MaNhom
+                join ResearchField on ResearchField.MaLinhVucNghienCuu = Team.MaLinhVucNghienCuu
+                join RegisterTeam on RegisterTeam.MaNhom = Team.MaNhom
+                join Student on Student.MaSinhVien = RegisterTeam.MaSinhVien
+            where 
+                MaGiangVienDk = '${lecturersId}' AND YKienGiangVien = 1 AND Pairing.Id IN (
+                    SELECT Id 
+                    FROM Stage 
+                    WHERE DKID = (
+                        SELECT DKID 
+                        FROM AcademicModulesRegisted 
+                        WHERE NgayBatDau <= CURRENT_DATE() AND NgayKetThuc >= CURRENT_DATE() 
+                    ) 
+                )`;
+
+            db.query(queryStr, (err, result) => {
+                if (err) {
+                    return reject(err);
+                }
+                return reslove(result);
+            });
+        });
+    }
+    GetTeamByStudentId(studentId) {
         return new Promise((reslove, reject) => {
             const queryStr = `
             select * 
             from 
                 Team join RegisterTeam on Team.MaNhom = RegisterTeam.MaNhom 
             where 
-                TenNhom = '${teamName}' and MaSinhVien = '${studentId}'`;
+                MaSinhVien = '${studentId}' and Id IN (
+                    SELECT Id 
+                    FROM Stage 
+                    WHERE DKID = (
+                        SELECT DKID 
+                        FROM AcademicModulesRegisted 
+                        WHERE NgayBatDau <= CURRENT_DATE() AND NgayKetThuc >= CURRENT_DATE() 
+                    ) 
+                )`;
 
             db.query(queryStr, (err, result) => {
                 if (err) {

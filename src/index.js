@@ -3,6 +3,13 @@ const route = require('./router');
 const dotenv = require('dotenv');
 const app = express();
 const port = 3001;
+const cors = require('cors');
+
+app.use(
+    cors({
+        origin: '*',
+    }),
+);
 
 dotenv.config();
 

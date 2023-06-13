@@ -46,5 +46,23 @@ class ResearchFieldModel {
             });
         });
     }
+    UpdateTopicNameOfResearchField(topicName, researchFieldId) {
+        return new Promise((reslove, reject) => {
+            const queryStr = `
+            update 
+                ResearchField 
+            set 
+                TenDetaiNghienCuu = '${topicName}' 
+            where 
+                MaLinhVucNghienCuu = ${researchFieldId}`;
+
+            db.query(queryStr, (err, result) => {
+                if (err) {
+                    return reject(err);
+                }
+                return reslove(result);
+            });
+        });
+    }
 }
 module.exports = new ResearchFieldModel();

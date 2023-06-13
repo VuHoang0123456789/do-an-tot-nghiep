@@ -1,19 +1,136 @@
 const db = require('../../config/db');
 class LecturerstModel {
-    GetAllLecturers() {
+    GetEmailOfLecturersByLecturersRegistedId(lecturersRegistedId) {
+        return new Promise((resolve, reject) => {
+            const queryStr = `
+            SELECT 
+                Lecturers.MaGiangVien, Lecturers.Email,
+                Lecturers.HoTen, NgaySinh, FileLyLichUrl, 
+                FileAnhUrl, TenNgonNguHuongDan, TenChuyenNganhHuongDan, count
+            FROM LecturersRegistered 
+                JOIN RegisterAsAnInstructor ON LecturersRegistered.MaGiangVienDk = RegisterAsAnInstructor.MaGiangVienDk 
+                JOIN Lecturers ON RegisterAsAnInstructor.MaGiangVien = Lecturers.MaGiangVien 
+            WHERE 
+                LecturersRegistered.MaGiangVienDk = '${lecturersRegistedId}'`;
+
+            db.query(queryStr, (err, result) => {
+                if (err) {
+                    return reject(err);
+                }
+                return resolve(result[0]);
+            });
+        });
+    }
+    GetLecturersToAllStage(lecturersId) {
+        return new Promise((resolve, reject) => {
+            const queryStr = `
+            SELECT 
+                Lecturers.MaGiangVien, Lecturers.Email,
+                Lecturers.HoTen, NgaySinh, FileLyLichUrl, 
+                FileAnhUrl, TenNgonNguHuongDan, TenChuyenNganhHuongDan, count
+            FROM LecturersRegistered 
+                JOIN RegisterAsAnInstructor ON LecturersRegistered.MaGiangVienDk = RegisterAsAnInstructor.MaGiangVienDk 
+                JOIN Lecturers ON RegisterAsAnInstructor.MaGiangVien = Lecturers.MaGiangVien 
+            WHERE 
+                Lecturers.MaGiangVien = '${lecturersId}'`;
+
+            db.query(queryStr, (err, result) => {
+                if (err) {
+                    return reject(err);
+                }
+                return resolve(result[0]);
+            });
+        });
+    }
+    GetEmailOfLecturers(lecturersId) {
+        return new Promise((resolve, reject) => {
+            const queryStr = `
+            SELECT 
+                Email, HoTen, LecturersRegistered.MaGiangVienDk
+            FROM LecturersRegistered 
+                JOIN RegisterAsAnInstructor ON LecturersRegistered.MaGiangVienDk = RegisterAsAnInstructor.MaGiangVienDk 
+                JOIN Lecturers ON RegisterAsAnInstructor.MaGiangVien = Lecturers.MaGiangVien 
+            WHERE 
+                RegisterAsAnInstructor.Id IN (
+                    SELECT Id 
+                    FROM Stage 
+                    WHERE DKID = (
+                        SELECT DKID 
+                        FROM AcademicModulesRegisted 
+                        WHERE NgayBatDau <= CURRENT_DATE() AND NgayKetThuc >= CURRENT_DATE() 
+                        )
+                    ) AND LecturersRegistered.MaGiangVienDk = '${lecturersId}'`;
+
+            db.query(queryStr, (err, result) => {
+                if (err) {
+                    return reject(err);
+                }
+                return resolve(result[0]);
+            });
+        });
+    }
+
+    GetAllLecturersLast() {
         return new Promise((resolve, reject) => {
             const queryStr = `
             select * 
             from 
-                (select LecturersRegistered.MaGiangVienDk, HoTen, NgaySinh, TenHocHamHocVi, TenNgonNguHuongDan, TenChuyenNganhHuongDan
-                from Lecturers join AcademicLevel on Lecturers.MaHocHamHocVi = AcademicLevel.MaHocHamHocVi 
-                join DangKyLamGiangVienHuongDan on DangKyLamGiangVienHuongDan.MaGiangVien = Lecturers.MagiangVien 
-                join LecturersRegistered on LecturersRegistered.MaGiangVienDk = DangKyLamGiangVienHuongDan.MaGiangVienDk) as kq
-            join 
-                (select MaGiangVienDk, COUNT(MaGiangVienDk) as SoLuongNhomCoTheNhan 
-                from Pairing 
-                where Id = (select Id from GiaiDoan where NgayBatDau <= now() and NgayKetThuc >= now()) 
-                group by MaGiangVienDk) as kq1 on kq.MaGiangVienDk = kq1.MaGiangVienDk;`;
+                    (select LecturersRegistered.MaGiangVienDk, HoTen, NgaySinh, TenHocHamHocVi, TenNgonNguHuongDan, TenChuyenNganhHuongDan
+                    from Lecturers join AcademicLevel on Lecturers.MaHocHamHocVi = AcademicLevel.MaHocHamHocVi 
+                    join RegisterAsAnInstructor on RegisterAsAnInstructor.MaGiangVien = Lecturers.MagiangVien 
+                    join LecturersRegistered on LecturersRegistered.MaGiangVienDk = RegisterAsAnInstructor.MaGiangVienDk) as kq
+                join 
+                    (select MaGiangVienDk, COUNT(MaGiangVienDk) as SoLuongNhomCoTheNhan 
+                    from Pairing 
+                    where Id = (select Id from Stage where NgayBatDau <= now() and NgayKetThuc >= now()) 
+                    group by MaGiangVienDk) as kq1 on kq.MaGiangVienDk = kq1.MaGiangVienDk
+            WHERE count > 0 and Id IN ( 
+                    SELECT 
+                        Id 
+                    FROM 
+                        Stage 
+                    WHERE 
+                        DKID = ( 
+                            SELECT 
+                                DKID 
+                            FROM 
+                                AcademicModulesRegisted
+                            WHERE 
+                                NgayBatDau <= CURRENT_DATE() AND NgayKetThuc >= CURRENT_DATE() 
+                        ) 
+                    )`;
+            db.query(queryStr, (err, result) => {
+                if (err) {
+                    return reject(err);
+                }
+                return resolve(result);
+            });
+        });
+    }
+    GetAllLecturersFirt() {
+        return new Promise((resolve, reject) => {
+            const queryStr = `
+            select 
+                * 
+            from 
+                Lecturers join AcademicLevel on Lecturers.MaHocHamHocVi = AcademicLevel.MaHocHamHocVi 
+                join RegisterAsAnInstructor on RegisterAsAnInstructor.MaGiangVien = Lecturers.MagiangVien 
+                join LecturersRegistered on LecturersRegistered.MaGiangVienDk = RegisterAsAnInstructor.MaGiangVienDk 
+            WHERE count > 0 and Id IN ( 
+                SELECT 
+                    Id 
+                FROM 
+                    Stage 
+                WHERE 
+                    DKID = ( 
+                        SELECT 
+                            DKID 
+                        FROM 
+                            AcademicModulesRegisted
+                        WHERE 
+                            NgayBatDau <= CURRENT_DATE() AND NgayKetThuc >= CURRENT_DATE() 
+                    ) 
+                )`;
 
             db.query(queryStr, (err, result) => {
                 if (err) {
@@ -32,11 +149,34 @@ class LecturerstModel {
                 YKienGiangVien, FileAnhUrl, FileLyLichUrl 
             from 
                 Pairing join LecturersRegistered on Pairing.MaGiangVienDk = LecturersRegistered.MaGiangVienDk 
-                join DangKyLamGiangVienHuongDan on LecturersRegistered.MaGiangVienDk = DangKyLamGiangVienHuongDan.MaGiangVienDk 
-                join Lecturers on Lecturers.MaGiangVien = DangKyLamGiangVienHuongDan.MaGiangVien 
+                join RegisterAsAnInstructor on LecturersRegistered.MaGiangVienDk = RegisterAsAnInstructor.MaGiangVienDk 
+                join Lecturers on Lecturers.MaGiangVien = RegisterAsAnInstructor.MaGiangVien 
                 join AcademicLevel on AcademicLevel.MaHocHamHocVi = Lecturers.MaHocHamHocVi 
             where 
                 Pairing.MaNhom = "${TeamId}"`;
+
+            db.query(queryStr, (err, result) => {
+                if (err) {
+                    return reject(err);
+                }
+                return resolve(result);
+            });
+        });
+    }
+    GetLecturersByTeamIdAndStageId(TeamId) {
+        return new Promise((resolve, reject) => {
+            const queryStr = `
+            select 
+                LecturersRegistered.MaGiangVienDk, HoTen, NgaySinh, 
+                TenHocHamHocVi, TenNgonNguHuongDan, TenChuyenNganhHuongDan,  
+                YKienGiangVien, FileAnhUrl, FileLyLichUrl 
+            from 
+                Pairing join LecturersRegistered on Pairing.MaGiangVienDk = LecturersRegistered.MaGiangVienDk 
+                join RegisterAsAnInstructor on LecturersRegistered.MaGiangVienDk = RegisterAsAnInstructor.MaGiangVienDk 
+                join Lecturers on Lecturers.MaGiangVien = RegisterAsAnInstructor.MaGiangVien 
+                join AcademicLevel on AcademicLevel.MaHocHamHocVi = Lecturers.MaHocHamHocVi 
+            where 
+                Pairing.MaNhom = "${TeamId}" AND YKienGiangVien = 1`;
 
             db.query(queryStr, (err, result) => {
                 if (err) {
@@ -50,11 +190,13 @@ class LecturerstModel {
         return new Promise((resolve, reject) => {
             const queryStr = `
             select 
-                Lecturers.HoTen, NgaySinh, TenHocHamHocVi, Email,  LecturersRegistered.MaGiangVienDk, FileLyLichUrl, FileAnhUrl
+                Lecturers.HoTen, NgaySinh, TenHocHamHocVi, Email,  
+                LecturersRegistered.MaGiangVienDk, FileLyLichUrl, 
+                FileAnhUrl, TenNgonNguHuongDan, TenChuyenNganhHuongDan, count
             from 
                 AcademicLevel join Lecturers on AcademicLevel.MaHocHamHocVi = Lecturers.MaHocHamHocVi
-                join DangKyLamGiangVienHuongDan on DangKyLamGiangVienHuongDan.MaGiangVien = Lecturers.MaGiangVien
-                join LecturersRegistered on LecturersRegistered.MaGiangVienDk = DangKyLamGiangVienHuongDan.MaGiangVienDk
+                join RegisterAsAnInstructor on RegisterAsAnInstructor.MaGiangVien = Lecturers.MaGiangVien
+                join LecturersRegistered on LecturersRegistered.MaGiangVienDk = RegisterAsAnInstructor.MaGiangVienDk
             where 
                 Lecturers.MaGiangVien = '${LecturersId}';`;
 
@@ -77,20 +219,60 @@ class LecturerstModel {
             });
         });
     }
-    AddFileOfLecturersRegisted(Lecturers) {
+    GetLecturersByEmailPlatfrom(Email) {
         return new Promise((resolve, reject) => {
             const queryStr = `
-            insert into LecturersRegistered 
-                (MaGiangVienDk, FileAnhUrl, FileLyLichUrl, TenNgonNguHuongDan, TenChuyenNganhHuongDan) 
-            values 
-                ('${Lecturers.LecturersId}', '${Lecturers.image_url}', '${Lecturers.background_url}', 
-                '${Lecturers.language}', '${Lecturers.specialized}')`;
+            SELECT 
+                *
+            FROM 
+                Lecturers 
+                JOIN AcademicLevel on AcademicLevel.MaHocHamHocVi = Lecturers.MaHocHamHocVi 
+            WHERE 
+                Lecturers.MaGiangVien = 
+                (
+                    SELECT 
+                        LecturersAccount.MaGiangVien 
+                    FROM 
+                        Account JOIN LecturersAccount ON Account.Email = LecturersAccount.Email 
+                    WHERE 
+                        LecturersAccount.Email = '${Email}'
+                )`;
 
             db.query(queryStr, (err, result) => {
                 if (err) {
                     return reject(err);
                 }
-                return resolve(result);
+                return resolve(result[0]);
+            });
+        });
+    }
+    GetLecturersByEmail(Email) {
+        return new Promise((resolve, reject) => {
+            const queryStr = `
+            SELECT 
+                Lecturers.MaGiangVien, LecturersRegistered.MaGiangVienDk, FileAnhUrl, FileLyLichUrl, NgaySinh,
+                TenNgonNguHuongDan, TenChuyenNganhHuongDan, HoTen, Email, TenHocHamHocVi, count
+            FROM 
+                Lecturers 
+                JOIN AcademicLevel on AcademicLevel.MaHocHamHocVi = Lecturers.MaHocHamHocVi 
+                JOIN RegisterAsAnInstructor ON Lecturers.MaGiangVien = RegisterAsAnInstructor.MaGiangVien 
+                JOIN LecturersRegistered ON RegisterAsAnInstructor.MaGiangVienDk = LecturersRegistered.MaGiangVienDk
+            WHERE 
+                Lecturers.MaGiangVien = 
+                (
+                    SELECT 
+                        LecturersAccount.MaGiangVien 
+                    FROM 
+                        Account JOIN LecturersAccount ON Account.Email = LecturersAccount.Email 
+                    WHERE 
+                        LecturersAccount.Email = '${Email}'
+                )`;
+
+            db.query(queryStr, (err, result) => {
+                if (err) {
+                    return reject(err);
+                }
+                return resolve(result[0]);
             });
         });
     }
@@ -105,14 +287,25 @@ class LecturerstModel {
             });
         });
     }
-    GetLecturersByLecturersRegistedIdAndLecturersId(LecturersId, stageId) {
+    GetLecturersByLecturersRegistedIdAndLecturersId(LecturersId) {
         return new Promise((resolve, reject) => {
             const queryStr = `
-            select DangKyLamGiangVienHuongDan.MaGiangVien
+            select RegisterAsAnInstructor.MaGiangVien
             from 
-                Lecturers join DangKyLamGiangVienHuongDan on Lecturers.MaGiangVien = DangKyLamGiangVienHuongDan.MaGiangVien 
+                Lecturers join RegisterAsAnInstructor on Lecturers.MaGiangVien = RegisterAsAnInstructor.MaGiangVien 
             where 
-                Lecturers.MaGiangVien = '${LecturersId}' and Id = ${stageId}`;
+                Lecturers.MaGiangVien = '${LecturersId}' and 
+                RegisterAsAnInstructor.Id IN 
+                ( 
+                    SELECT Id 
+                    FROM Stage W
+                    WHERE DKID = 
+                    ( 
+                        SELECT DKID 
+                        FROM AcademicModulesRegisted 
+                        WHERE NgayBatDau <= CURRENT_DATE() AND NgayKetThuc >= CURRENT_DATE() 
+                        ) 
+                )`;
 
             db.query(queryStr, (err, result) => {
                 if (err) {
@@ -122,6 +315,24 @@ class LecturerstModel {
             });
         });
     }
+    AddFileOfLecturersRegisted(Lecturers) {
+        return new Promise((resolve, reject) => {
+            const queryStr = `
+            insert into LecturersRegistered 
+                (MaGiangVienDk, FileAnhUrl, FileLyLichUrl, TenNgonNguHuongDan, TenChuyenNganhHuongDan, count) 
+            values 
+                ('${Lecturers.LecturersId}', '${Lecturers.image_url}', '${Lecturers.background_url}', 
+                '${Lecturers.language}', '${Lecturers.specialized}', ${Lecturers.count})`;
+
+            db.query(queryStr, (err, result) => {
+                if (err) {
+                    return reject(err);
+                }
+                return resolve(result);
+            });
+        });
+    }
+
     AddNewLecturersOfLecturersRegisted(Lecturers) {
         return new Promise((resolve, reject) => {
             const queryStr = `
@@ -129,7 +340,8 @@ class LecturerstModel {
                 LecturersRegistered 
             set 
                 TenNgonNguHuongDan = '${Lecturers.language}', 
-                TenChuyenNganhHuongDan = '${Lecturers.specialized}' 
+                TenChuyenNganhHuongDan = '${Lecturers.specialized}', 
+                count = ${Lecturers.count}
             where 
                 MaGiangVienDk = '${Lecturers.lecturersRegistedId}'`;
 
@@ -144,7 +356,7 @@ class LecturerstModel {
     AddRegisterIsLecturersRegisted(RegisterLecturers) {
         return new Promise((resolve, reject) => {
             const queryStr = `
-            insert into DangKyLamGiangVienHuongDan 
+            insert into RegisterAsAnInstructor 
                 (ThoiDiemDangKy, Id, MaGiangVienDk, MaGiangVien) 
             values 
                 ('${RegisterLecturers.registerDate}', '${RegisterLecturers.stageId}', 
@@ -165,10 +377,27 @@ class LecturerstModel {
                 LecturersRegistered 
             set 
                 FileAnhUrl = '${LecturersRegisted.url_imge}', FileLyLichUrl = '${LecturersRegisted.url_background}', 
-                TenNgonNguHuongDan = '${LecturersRegisted.language}', 
+                TenNgonNguHuongDan = '${LecturersRegisted.language}', count = ${LecturersRegisted.count},
                 TenChuyenNganhHuongDan = '${LecturersRegisted.specialized}' 
             where 
                 MaGiangVienDk = '${LecturersRegisted.lecturersRegistedId}';`;
+
+            db.query(queryStr, (err, result) => {
+                if (err) {
+                    return reject(err);
+                }
+                return resolve(result);
+            });
+        });
+    }
+    UpdateCountLecturersRegisterd(lecturersRegistedId, count) {
+        return new Promise((resolve, reject) => {
+            const queryStr = `
+            update 
+                LecturersRegistered 
+            set count = ${count}
+            where 
+                MaGiangVienDk = '${lecturersRegistedId}';`;
 
             db.query(queryStr, (err, result) => {
                 if (err) {

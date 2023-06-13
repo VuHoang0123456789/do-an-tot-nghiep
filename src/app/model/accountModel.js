@@ -57,8 +57,9 @@ class AccountModel {
     InsertUser(user) {
         return new Promise((resolve, reject) => {
             const queryStr = `
-            call InsretAccount(${parseInt(user.typeAccount)},'${user.Id}', 
-            '${user.email}', '${user.passWord}', '${user.showName}', '${user.url_avatar}', ${user.verified})`;
+            call InsertAccount(${parseInt(user.typeAccount)},'${user.Id}', 
+            '${user.email}', '${user.passWord}', '${user.showName}', '${user.url_avatar}')`;
+            console.log(queryStr);
             db.query(queryStr, (err, result) => {
                 if (err) {
                     reject(err);

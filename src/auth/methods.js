@@ -54,3 +54,7 @@ exports.FormatDate = async (date) => {
         [date.getHours(), date.getMinutes(), date.getSeconds()].join(':');
     return dformat;
 };
+exports.FormatDateNoHour = async (date) => {
+    const dformat = [date.getFullYear(), date.getMonth() + 1, date.getDate()].join('-');
+    return dformat;
+};

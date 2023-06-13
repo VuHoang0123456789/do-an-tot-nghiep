@@ -6,8 +6,9 @@ const AccountController = require('../app/controller/accountController');
 
 const isAuth = authMiddleware.isAuth;
 
-router.get('/get-account/:slug', isAuth, AccountController.GetAccount);
+router.get('/get-account', isAuth, AccountController.GetAccount);
 router.post('/register', AccountController.RegisterAccount);
-router.put('/update-account/:slug', isAuth, AccountController.UpdateAccount);
-router.put('/update-account-file/:slug', isAuth, fileUploader.single('avatar'), AccountController.UpdateFileOfAccount);
+router.put('/update-account', isAuth, AccountController.UpdateAccount);
+router.put('/forgot-password', AccountController.ForgotPassWord);
+router.put('/update-account-file', isAuth, fileUploader.single('avatar'), AccountController.UpdateFileOfAccount);
 module.exports = router;

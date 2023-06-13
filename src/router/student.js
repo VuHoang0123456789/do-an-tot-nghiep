@@ -9,22 +9,39 @@ const studentController = require('../app/controller/studentController');
 const isAuth = AuthMiddleware.isAuth;
 const isUpLoadFileReport = middleware.isUpLoadFileReport;
 const isUpdateTeam = middleware.isUpdateTeam;
+const isUpLoadFileOfteam = middleware.isUpLoadFileOfteam;
 
-router.get('/:slug/show-infomation', isAuth, StudentController.GetAllInfomation);
-router.get('/:slug/get-team', isAuth, StudentController.GetTeam);
-router.post('/:slug/upload-file', isAuth, fileUploader.single('avatar'), StudentController.UpLoadFile);
-router.post('/:slug/register-platform', isAuth, StudentController.RegisterPlatfrom);
-router.post('/:slug/add-new-pairing', isAuth, StudentController.AddNewParing);
-router.put('/:slug/update-team', isAuth, StudentController.UpdateTeam);
-router.put('/:slug/update-file', isAuth, isUpdateTeam, fileUploader.single('avatar'), StudentController.UpDateFile);
-router.put('/:slug/update-pairing', isAuth, StudentController.UpdatePairing);
+router.get('/show-infomation', isAuth, StudentController.GetAllInfomation);
+router.get('/show-infomation-pesonal', isAuth, StudentController.GetAllInfomationPesonal);
+router.get('/get-team', isAuth, StudentController.GetTeam);
+router.get('/get-team-studentid', isAuth, StudentController.GetTeamByStudentID);
+router.get('/get-student', isAuth, StudentController.GetStudent);
+router.get('/get-all-report', isAuth, StudentController.GetAllReport);
+router.get('/get-report-reportid', isAuth, StudentController.GetReport);
+
+router.post(
+    '/upload-file',
+    isAuth,
+    isUpLoadFileOfteam,
+    fileUploader.single('uploadfile'),
+    StudentController.UpLoadFile,
+);
+router.post('/register-platform', isAuth, StudentController.RegisterPlatfrom);
+router.post('/add-new-pairing', isAuth, StudentController.AddNewParing);
+
+router.put('/update-team', isAuth, StudentController.UpdateTeam);
+router.put('/update-researchfield', isAuth, StudentController.UpdateRearchfield);
+router.put('/update-researchfield-topic-name', isAuth, StudentController.UpdateRearchfieldToppicName);
+router.put('/update-research-question', isAuth, StudentController.UpdateResearchQuestion);
+router.put('/update-file', isAuth, isUpdateTeam, fileUploader.single('updatefile'), StudentController.UpDateFile);
 router.put(
-    '/:slug/upload-file-report',
+    '/upload-file-report',
     isAuth,
     isUpLoadFileReport,
     fileUploader.single('uploadfile'),
     studentController.UpLoadFileReport,
 );
-router.put('/:slug/update-ResearchQuestion', isAuth, StudentController.UpdateResearchQuestion);
-router.delete('/:slug/delete-ResearchQuestion', isAuth, StudentController.DeleteResearchQuestion);
+
+router.delete('/delete-paring', isAuth, studentController.DeletePairing);
+router.delete('/delete-Research-question', isAuth, StudentController.DeleteResearchQuestion);
 module.exports = router;

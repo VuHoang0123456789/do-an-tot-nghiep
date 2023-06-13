@@ -9,7 +9,7 @@ class OTPModule {
                 VerifyOTP
             where 
                 otp = ${user.otp} and email = '${user.email}' 
-                and expireAt > STR_TO_DATE('${dateNow}', '%Y-%m-%d %H:%i:%s') and isUsed = false`;
+                and expireAt > STR_TO_DATE('${dateNow}', '%Y-%m-%d %H:%i:%s')`;
             db.query(queryStr, (err, result) => {
                 if (err) {
                     return reject(err);
@@ -22,9 +22,9 @@ class OTPModule {
         return new Promise((resolve, reject) => {
             const queryStr = `
             insert into VerifyOTP 
-                (otp, creatAt, expireAt, email, isUsed) 
+                (otp, creatAt, expireAt, email) 
             values 
-                ('${Otp.otp}', '${Otp.creatAt}','${Otp.expireAt}', '${Otp.email}', ${Otp.isUsed})`;
+                ('${Otp.otp}', '${Otp.creatAt}','${Otp.expireAt}', '${Otp.email}')`;
 
             db.query(queryStr, (err, result) => {
                 if (err) {
