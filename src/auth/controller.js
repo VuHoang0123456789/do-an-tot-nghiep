@@ -315,7 +315,7 @@ class AuthController {
             // tạo và lưu otp vào database
             const creatAt = new Date();
             OTP.creatAt = await authMethod.FormatDate(creatAt);
-            creatAt.setSeconds(creatAt.getSeconds() + 30);
+            creatAt.setSeconds(creatAt.getSeconds() + 300);
             OTP.expireAt = await authMethod.FormatDate(creatAt);
             OTP.otp = await authMethod.generateOtp();
 
