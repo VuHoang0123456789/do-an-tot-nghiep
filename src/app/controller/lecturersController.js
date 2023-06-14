@@ -176,7 +176,7 @@ class LecturersController {
             return res.status(200).json(lecturers);
         } catch (error) {
             console.log(error);
-            return res.status(401).json({ msg: 'Không tìm thấy giảng viên.' });
+            return res.status(500).json({ msg: 'Không tìm thấy giảng viên.' });
         }
     }
     //GET /get-all-report
