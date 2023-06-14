@@ -304,6 +304,10 @@ class AuthController {
                     }
                     NewUser.showName = Admin.HoTen;
                 }
+            } else {
+                return res
+                    .status(400)
+                    .json({ msg: 'Bạn chưa tạo tài khoản, vui lòng tạo tài khoản trước khi đăng nhập' });
             }
 
             const OTP = {
