@@ -162,6 +162,7 @@ class LecturersController {
                 lecturers.count = CheckLectueresRegisted.count > 0 ? CheckLectueresRegisted.count : undefined;
                 lecturers.FileAnhUrl = CheckLectueresRegisted.FileAnhUrl;
                 lecturers.FileLyLichUrl = CheckLectueresRegisted.FileLyLichUrl;
+                lecturers.lecturersRegistedId = CheckLectueresRegisted.MaGiangVienDk;
             }
             return res.status(200).json(lecturers);
         } catch (error) {

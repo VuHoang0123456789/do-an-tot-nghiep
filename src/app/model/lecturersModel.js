@@ -27,7 +27,7 @@ class LecturerstModel {
             SELECT 
                 Lecturers.MaGiangVien, Lecturers.Email,
                 Lecturers.HoTen, NgaySinh, FileLyLichUrl, 
-                FileAnhUrl, TenNgonNguHuongDan, TenChuyenNganhHuongDan, count
+                FileAnhUrl, TenNgonNguHuongDan, TenChuyenNganhHuongDan, count, MaGiangVienDk
             FROM LecturersRegistered 
                 JOIN RegisterAsAnInstructor ON LecturersRegistered.MaGiangVienDk = RegisterAsAnInstructor.MaGiangVienDk 
                 JOIN Lecturers ON RegisterAsAnInstructor.MaGiangVien = Lecturers.MaGiangVien 
