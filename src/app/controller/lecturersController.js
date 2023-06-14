@@ -173,6 +173,9 @@ class LecturersController {
     async GetLecturersRegisted(req, res, next) {
         try {
             const lecturers = await LecturerstModel.GetLecturersByEmail(req.user.Email);
+            if (lecturers.length === 0) {
+                return res.status(204).json({ msg: 'Không tìm thấy giảng viên.' });
+            }
             return res.status(200).json(lecturers);
         } catch (error) {
             console.log(error);
