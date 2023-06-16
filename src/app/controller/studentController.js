@@ -371,7 +371,7 @@ class StudentController {
             if (email.length === 0) {
                 return;
             }
-            console.log(email);
+
             const teamInfomation = await teamModel.GetTeamByTeamId(req.report[0].MaNhom);
             const sengridApiKey = process.env.SENDGRID_API_KEY; // Key sendgrid
             const adminEmailAddress = process.env.ADMIN_EMAIL_ADDRESS; // Địa chỉ eamil gửi thư
@@ -398,6 +398,7 @@ class StudentController {
                 text: content,
                 html: `<strong>${content}</strong>`,
             };
+
             sgMail
                 .sendMultiple(msg)
                 .then(() => {
