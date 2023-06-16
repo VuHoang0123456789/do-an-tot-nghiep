@@ -242,7 +242,7 @@ class AdminModel {
             const queryStr = `
             SELECT 
                 TenNhom, getTeam.HoTen AS TenSinhVien,  SoDienThoai, LyLichThanhVien, TenLinhVucNghienCuu,
-                getLecturers.HoTen AS TenGiangVien, DonViCongtac, YKienGiangVien, MaGiangVienDk, TenNhom,
+                getLecturers.HoTen AS TenGiangVien, DonViCongtac, YKienGiangVien, getPairing.MaGiangVienDk, TenNhom,
                  getPairing.MaGiangVienDk, getTeam.MaNhom
             FROM (
                 SELECT Pairing.MaGiangVienDk, Pairing.MaNhom, Pairing.YKienGiangVien
