@@ -371,7 +371,7 @@ class StudentController {
             if (email.length === 0) {
                 return;
             }
-
+            console.log(req.report);
             const teamInfomation = await teamModel.GetTeamByTeamId(req.report[0].MaNhom);
             const sengridApiKey = process.env.SENDGRID_API_KEY; // Key sendgrid
             const adminEmailAddress = process.env.ADMIN_EMAIL_ADDRESS; // Địa chỉ eamil gửi thư
@@ -388,7 +388,7 @@ class StudentController {
                 <br/>
                 Thông tin báo cáo:<br/>
                 Tiêu đề: ${req.report[0].title}<br/>
-                Ngày tạo: ${req.report[0].createAt}<br/>
+                Ngày nộp: ${req.report[0].createAt}<br/>
                 file báo cáo: ${req.report[0].url}
             `;
             const msg = {
