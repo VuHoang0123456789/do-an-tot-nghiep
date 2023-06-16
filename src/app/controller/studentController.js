@@ -389,7 +389,7 @@ class StudentController {
                 Thông tin báo cáo:<br/>
                 Tiêu đề: ${req.report[0].TieuDe}<br/>
                 Ngày nộp: ${[new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate()].join('-')}<br/>
-                file báo cáo: ${req.report[0].FileBaoCao}
+                file báo cáo: ${req.file.path}
             `;
             const msg = {
                 to: email,
